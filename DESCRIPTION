@@ -1,0 +1,19 @@
+Package: CountOpsLogan
+Title: Operation counts for Boston Logan Airport
+Version: 0.1.0
+Authors@R: 
+    person(given = "Kent",
+           family = "Johnson",
+           role = c("aut", "cre"),
+           email = "kent3737@gmail.com")
+Maintainer: Kent Johnson <kent3737@gmail.com>
+Description: Detailed and summary operation counts for 
+    arrivals and departures at Boston Logan Airport from
+    2010-03-02 to 2019-07-15.
+    Data is FAA CountOps data received by FOIA request.
+License: CC0
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.3)
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.0.2
