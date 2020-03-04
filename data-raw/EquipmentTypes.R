@@ -1,4 +1,7 @@
+# Convert from CountOps equipment type to general categories
+
 library(dplyr)
+library(readxl)
 library(stringr)
 
 widebody = scan(what=character(), text="
@@ -112,7 +115,6 @@ BE2
 BE3
 BE9
 C208
-BE9
 DA4
 M20
 M32
@@ -144,22 +146,6 @@ S76
 SK76
 ")
 
-make_re = function(prefixes) {
-  paste0('^', paste(prefixes, collapse='|'))
-}
-equip_category = function(equip) {
-  case_when(
-    str_detect(equip, make_re(widebody)) ~ 'Wide body',
-    str_detect(equip, make_re(single_aisle)) ~ 'Single aisle',
-    str_detect(equip, make_re(bizjets)) ~ 'Biz jet',
-    str_detect(equip, make_re(regional_jets)) ~ 'Regional jet',
-    str_detect(equip, make_re(general_aviation)) ~ 'GA',
-    str_detect(equip, make_re(regional_turboprops)) ~ 'Regional prop',
-    str_detect(equip, make_re(helicopters)) ~ 'Helo',
-    TRUE ~ 'Other'
-  )
-}
-
 # Equipment types as a named list
 equip_types = c(
   'Wide body',
@@ -171,3 +157,39 @@ equip_types = c(
   'Helo'
 )
 
+# Add in another big list and append to the above lists
+other_equip = read_xlsx(here::here('data-raw/OtherEquipment_v3.xlsx'),
+                col_types=c('text', 'skip', 'text', 'skip', 'skip')) %>%
+  filter(!is.na(Category), !Equipment %in% c('NONE', 'NA'))
+
+widebody = c(widebody,
+             other_equip$Equipment[other_equip$Category=='Wide body'])
+single_aisle = c(single_aisle,
+             other_equip$Equipment[other_equip$Category=='Single aisle'])
+bizjets = c(bizjets,
+             other_equip$Equipment[other_equip$Category=='Biz jet'])
+regional_jets = c(regional_jets,
+             other_equip$Equipment[other_equip$Category=='Regional jet'])
+general_aviation = c(general_aviation,
+             other_equip$Equipment[other_equip$Category=='GA'])
+regional_turboprops = c(regional_turboprops,
+             other_equip$Equipment[other_equip$Category=='Regional prop'])
+helicopters = c(helicopters,
+             other_equip$Equipment[other_equip$Category=='Helo'])
+
+make_re = function(prefixes) {
+  paste0('^', paste(prefixes, collapse='|'))
+}
+
+equip_category = function(equip) {
+  case_when(
+    str_detect(equip, make_re(widebody)) ~ 'Wide body',
+    str_detect(equip, make_re(single_aisle)) ~ 'Single aisle',
+    str_detect(equip, make_re(bizjets)) ~ 'Biz jet',
+    str_detect(equip, make_re(regional_jets)) ~ 'Regional jet',
+    str_detect(equip, make_re(general_aviation)) ~ 'GA',
+    str_detect(equip, make_re(regional_turboprops)) ~ 'Regional prop',
+    str_detect(equip, make_re(helicopters)) ~ 'Helo',
+    TRUE ~ 'Unknown'
+  )
+}
